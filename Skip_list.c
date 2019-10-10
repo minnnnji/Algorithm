@@ -13,15 +13,15 @@
  -1, init O(n)
  head와 tail를 각각 레이어의 개수대로 연결하고 head의 값은 int의 최솟값으로 tail의 값은 int형의 최댓값으로 설정했다.
 
- -2, insert_node O(n^2)
- 새로운 노드 p를 만들어서 tmp에는 head의 다음 값에 연결해주고 tmp_prev에는 head를 넣어줬다.
- 그리고 tmp가 tail이 아니면서 tmp의 값이 입력한 값보다 커질 때까지 while문을 돈다 O(n);
- 찾으면 tmp_prev - p - tmp 순으로 연결시켜줍니다. 이 과정을 레이어 개수 대로 해야하기 때문에
- 결국 insert_node의 시간 복잡도는 O(n^2)
+ -2, insert_node O(log n)
+ 새로운 노드 p를 만들고 최상위 레이어 부터 시작해서 tmp에 최상위 레이어 head를 넣고 tmp의 값이 추가할 값보다 크면 그 밑 레이어로 내려가고
+ tmp - e - tmp->next값이 되는 위치가 되면 새로운 노드와 연결시켜주고 아니면 그 값을 찾을 때까지 넘겨준다 그렇게
+ 제일 밑 레이어까지 돌아서 추가하면 끝내기
 
- -3, delete_node O(n^2)
- insert할때 와 동일하게 tmp와 tmp의 전노드를 설정해두고 삭제해야하는 값이 있으면 tmp_prev와 tmp->next값을 연결해줍니다. O(n)
- 이 방법을 레이어 개수대로 하니까 결국 시간 복잡도는 O(n^2)
+ -3, delete_node O(log n)
+  insert와 비슷한 방법으로 tmp->next 값이 e보다 크면 밑으로 내리고 아니면 내가 없앨 값이랑 같으면 erase에 tmp를 넣고
+  tmp->next를 tmp->next->next랑 연결한 후 tmp는 그 밑으로 내리고 erase는 메모리 해제를 해준다 그게 아니라면
+  다음으로 넘겨서 그 값을 찾아준다 만약 tmp가 NULL이라는 소리는 이제 최하위 층까지 이미 다 끝났다는 소리임으로 종료
 
  -4, check_node O(n)
  내가 찾는 노드가 최하위레이어에 없다면 결국 위 레이어에는 없는거니까 error처리를 하기위해서 check_node를 만들었고
@@ -69,31 +69,52 @@ void init(node ***h, node ***t,int k) {
 void insert_node(node ***head, node ***tail, int e, int l) {
 	node *tmp_prev = NULL, *tmp = NULL;
 	node **p = getnode(l, e);
-	for (int i = 0; i < l; i++) {
-		tmp_prev = (*head)[i];
-		tmp = (*head)[i]->next;
-		while (tmp!=(*tail)[i]&&tmp->elem < e) {
-			tmp = tmp->next;
-			tmp_prev = tmp_prev->next;
+	int i = l - 1 ,k = 1;
+	tmp_prev = (*head)[l - 1];
+	tmp = (*head)[l - 1];
+	while (1) {
+		if (tmp->elem > e) {
+			tmp = (*head)[l - 1 - k]->next;
+			k++;
 		}
-		tmp_prev->next = p[i];
-		p[i]->next = tmp;
+		else {
+			if (tmp->next->elem > e && tmp->elem < e) {
+				p[i]->next = tmp->next;
+				tmp->next = p[i];
+				i--;
+				tmp = tmp->down;
+			}
+			else {
+				tmp = tmp->next;
+			}
+		}
+		if (i < 0) {
+			break;
+		}
 	}
 }
 void delete_node(node ***head, node ***tail, int e, int l) {
-	node *tmp_prev = NULL, *tmp = NULL;
-	for (int i = 0; i < l; i++) {
-		tmp_prev = (*head)[i];
-		tmp = (*head)[i]->next;
-		while (tmp != (*tail)[i]) {
-			if (tmp->elem == e) {
-				tmp_prev->next = tmp->next;
-				free(tmp);
-				break;
+	node *tmp = (*head)[l - 1], *erase = NULL;
+	int i = 1;
+	while (1) {
+		if (tmp->next->elem > e) {
+			tmp = (*head)[l - 1 - i];
+			i++;
+		}
+		else {
+			if (tmp->next->elem == e) {
+				erase = tmp->next;
+				tmp->next = (tmp->next)->next;
+				tmp = tmp->down;
+				free(erase);
 			}
-			tmp = tmp->next;
-			tmp_prev = tmp_prev->next;
-		}	
+			else {
+				tmp = tmp->next;
+			}
+		}
+		if (tmp == NULL) {
+			break;
+		}
 	}
 }
 int check_node(node **head, node **tail, int e) {
