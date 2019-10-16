@@ -9,7 +9,7 @@
 }*/
 void InPlaceInsertionSort(int *p, int n) {
 	int tmp,i,j;
-	for (i = 0; i < n; i++) {
+	for (i = 1; i < n; i++) {
 		tmp = p[i];
 		j = i - 1;
 		while (j >= 0&&tmp<p[j]) {
