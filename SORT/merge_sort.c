@@ -1,10 +1,9 @@
-//무순으로 숫자가 N개 들어왔을 떄 합병정렬
 #define _CRT_SECURE_NO_WARNINGS
 #include<stdio.h>
 #include<stdlib.h>
 typedef struct node {
 	struct node *next;
-	int elem;
+	double elem;
 }node;
 typedef struct TMP {
 	node *L1, *L2;
@@ -15,7 +14,7 @@ node *getnode() {
 	p->next = NULL;
 	return p;
 }
-void insert_node(node **h, int e) {
+void insert_node(node **h, double e) {
 	node *tmp = *h;
 	node *new_nd = getnode();
 	new_nd->elem = e;
@@ -53,17 +52,18 @@ node *merge(node *L1, node *L2) {
 	else if (L2 == NULL) {
 		return L1;
 	}
-	if (L1->elem < L2->elem) {
+	int a = L1->elem, b = L2->elem;
+	if (a <= b) {
 		result = L1;
 		L1->next = merge(L1->next, L2);
 	}
-	else {
+	else if(a > b) {
 		result = L2;
 		L2->next = merge(L1, L2->next);
 	}
 	return result;
 }
-void mergeSort(node **h,int n) {
+void mergeSort(node **h, int n) {
 	node *L1, *L2;
 	TMP tmp;
 	if (n > 1 && (*h) != NULL) {
@@ -79,17 +79,18 @@ void mergeSort(node **h,int n) {
 void print_node(node *h) {
 	node *tmp = h;
 	while (tmp->next != NULL) {
-		printf(" %d", tmp->elem);
+		printf(" %.1lf", tmp->elem);
 		tmp = tmp->next;
 	}
-	printf(" %d\n",tmp->elem);
+	printf(" %.1lf\n", tmp->elem);
 }
 int main() {
-	int n, key;
+	int n;
+	double key;
 	node *h = NULL;
 	scanf("%d", &n);
 	for (int i = 0; i < n; i++) {
-		scanf("%d", &key);
+		scanf("%lf", &key);
 		insert_node(&h, key);
 	}
 	mergeSort(&h, n);
