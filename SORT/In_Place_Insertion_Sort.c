@@ -2,28 +2,32 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
-/*void swap(int *a,int *b) {
+void swap(int *a, int *b) {
 	int tmp = *a;
 	*a = *b;
 	*b = tmp;
-}*/
-void InPlaceInsertionSort(int *p, int n) {
-	int tmp,i,j;
-	for (i = 1; i < n; i++) {
-		tmp = p[i];
-		j = i - 1;
-		while (j >= 0&&tmp<p[j]) {
-			p[j + 1] = p[j];
-			j--;
-		}
-		p[j + 1] = tmp;
-	}
 }
-void travel(int *p, int n) {
+void print_arr(int *p, int n,int cnt) {
+	printf("-------------------------\n");
 	for (int i = 0; i < n; i++) {
 		printf(" %d", p[i]);
 	}
-	printf("\n\n");
+	printf(" cnt = %d\n",cnt);
+}
+void insertion_sort(int *p, int n) {
+	int j, tmp, cnt ;
+	for (int i = 1; i < n; i++) {
+		j = i - 1;
+		tmp = p[i];
+		cnt = 0;
+		while (j >= 0 && tmp < p[j]) {
+			p[j + 1] = p[j];
+			j--;
+			cnt++;
+		}
+		p[j + 1] = tmp;
+		print_arr(p, n, cnt);
+	}
 }
 int main() {
 	srand(time(NULL));
@@ -31,12 +35,10 @@ int main() {
 	scanf("%d", &n);
 	p = (int *)malloc(sizeof(int)*n);
 	for (int i = 0; i < n; i++) {
-		p[i] = rand() % 10; //0 ~ 10까지의 수
-
+		p[i] = rand() % 50 + 1;
 	}
-	printf("----------정렬전----------\n\n");
-	travel(p, n);
-	InPlaceInsertionSort(p, n);
-	printf("----------정렬후----------\n\n");
-	travel(p, n);
+	print_arr(p, n, 0);
+	insertion_sort(p, n);
+	printf("-----------final----------\n");
+	print_arr(p, n, 0);
 }
