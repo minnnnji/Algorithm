@@ -3,96 +3,81 @@
 #include<stdlib.h>
 typedef struct node {
 	struct node *next;
-	double elem;
+	int elem;
 }node;
-typedef struct TMP {
-	node *L1, *L2;
-}TMP;
 node *getnode() {
 	node *p = NULL;
 	p = (node *)malloc(sizeof(node));
 	p->next = NULL;
 	return p;
 }
-void insert_node(node **h, double e) {
-	node *tmp = *h;
-	node *new_nd = getnode();
-	new_nd->elem = e;
+void insert_node(node **h, int key) {
+	node *p = getnode();
+	p->elem = key;
 	if (*h == NULL) {
-		(*h) = new_nd;
+		*h = p;
 	}
 	else {
+		node *tmp = *h;
 		while (tmp->next != NULL) {
 			tmp = tmp->next;
 		}
-		tmp->next = new_nd;
+		tmp->next = p;
 	}
 }
-TMP mg_partition(node *h, int k) {
-	TMP result;
-	node *tmp = h, *L1, *L2;
-
-	L1 = tmp;
-	for (int i = 0; i < k - 1; i++) {
+void travel_node(node *h) {
+	node *tmp = h;
+	while (tmp != NULL) {
+		printf(" %d", tmp->elem);
 		tmp = tmp->next;
 	}
-	L2 = tmp->next;
+	printf("\n");
+}
+void partition(node *L,node **L1, node **L2, int n) {
+	*L1 = L;
+	node *tmp = L;
+	for (int i = 0; i < n - 1; i++) {
+		tmp = tmp->next;
+	}
+	*L2 = tmp->next;
 	tmp->next = NULL;
-
-	result.L1 = L1;
-	result.L2 = L2;
-
-	return result;
 }
 node *merge(node *L1, node *L2) {
-	node *result = NULL;
+	node *tmp;
 	if (L1 == NULL) {
 		return L2;
 	}
 	else if (L2 == NULL) {
 		return L1;
 	}
-	int a = L1->elem, b = L2->elem;
-	if (a <= b) {
-		result = L1;
-		L1->next = merge(L1->next, L2);
+	if (L1->elem < L2->elem) {
+		tmp = L1;
+		tmp->next = merge(L1->next, L2);
 	}
-	else if(a > b) {
-		result = L2;
-		L2->next = merge(L1, L2->next);
+	else {
+		tmp = L2;
+		tmp->next = merge(L1, L2->next);
 	}
-	return result;
+	return tmp;
 }
-void mergeSort(node **h, int n) {
+void mergeSort(node **L,int n) {
 	node *L1, *L2;
-	TMP tmp;
-	if (n > 1 && (*h) != NULL) {
-		tmp = mg_partition(*h, n / 2);
-		L1 = tmp.L1;
-		L2 = tmp.L2;
+	if (n > 1 && *L != NULL) {
+		partition(*L, &L1, &L2, n / 2);
 		mergeSort(&L1, n / 2);
 		mergeSort(&L2, n - n / 2);
 
-		*h = merge(L1, L2);
+		*L = merge(L1, L2);
 	}
-}
-void print_node(node *h) {
-	node *tmp = h;
-	while (tmp->next != NULL) {
-		printf(" %.1lf", tmp->elem);
-		tmp = tmp->next;
-	}
-	printf(" %.1lf\n", tmp->elem);
 }
 int main() {
-	int n;
-	double key;
+	int n, key;
 	node *h = NULL;
 	scanf("%d", &n);
 	for (int i = 0; i < n; i++) {
-		scanf("%lf", &key);
+		scanf("%d", &key);
 		insert_node(&h, key);
 	}
 	mergeSort(&h, n);
-	print_node(h);
+	travel_node(h);
 }
