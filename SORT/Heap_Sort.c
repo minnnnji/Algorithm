@@ -1,97 +1,62 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include<stdio.h>
 #include<stdlib.h>
-void swap(int *a, int *b) {
+#include<time.h>
+void swap(int *a,int *b){
 	int tmp = *a;
 	*a = *b;
 	*b = tmp;
 }
-void upheap(int *p, int n) {
-	int i = n / 2;
-	if (i < 1) {
+void downHeap(int *p, int n, int i) {
+	int r = (2 * i) + 1, l = 2 * i;
+	if (r > n && l > n) {
 		return;
 	}
-	else {
-		if (p[n] > p[i]) {
-			swap(p + n, p + i);
-			upheap(p, i);
+	int max = i;
+	if (r <= n) {
+		if (p[r] > p[max]) {
+			max = r;
 		}
+	}
+	if (p[l] > p[max]) {
+		max = l;
+	}
+	if (max != i) {
+		swap(p + max, p + i);
+		downHeap(p, n, max);
 	}
 }
-void insert_heap(int *p, int k, int *cnt) {
-	(*cnt)++;
-	p[(*cnt)] = k;
-	upheap(p,*cnt);
-	printf("0\n");
-}
-void downheap(int *p, int cnt,int index) {
-	int l = 2 * index, r = (2 * index) + 1, max = index;
-	if (r <= cnt) {
-		if (p[l] > p[r]) {
-			if (p[l] > p[index]) {
-				max = l;
-			}
-			else {
-				max = index;
-			}
-		}
-		else {
-			if (p[r] > p[index]) {
-				max = r;
-			}
-			else {
-				max = index;
-			}
-		}
-	}
-	else if (l <= cnt) {
-		if (p[l] > p[index]) {
-			max = l;
-		}
-		else {
-			max = index;
-		}
-	}
-	else {
-		return;
-	}
-	if (max != index) {
-		swap(p + max, p + index);
-		downheap(p, cnt, max);
+void buildHeap(int *p, int n) {
+	for (int i = n / 2; i > 0; i--) {
+		downHeap(p, n, i);
 	}
 }
-void delete_heap(int *p,int *cnt) {
-	int erase = p[1];
-	swap(p + 1, p + (*cnt));
-	(*cnt)--;
-	downheap(p, *cnt, 1);
-	printf("%d\n", erase);
+void deleteHeap(int *p, int n) {
+	int tmp;
+	for (int i = 0; i < n; i++) {
+		tmp = p[1];
+		p[1] = p[n - i];
+		p[n - i] = tmp;
+		downHeap(p, n - i - 1, 1);
+	}
 }
-void print_heap(int *p, int n) {
+void print_arr(int *p, int n) {
 	for (int i = 1; i <= n; i++) {
 		printf(" %d", p[i]);
 	}
 	printf("\n");
 }
 int main() {
-	int *p = NULL, cnt = 0, key;
-	char ch;
-	p = (int *)malloc(sizeof(int) * 100);
-	while (1) {
-		scanf("%c", &ch);
-		if (ch == 'q') {
-			break;
-		}
-		if (ch == 'i') {
-			scanf("%d", &key);
-			insert_heap(p, key, &cnt);
-		}
-		if (ch == 'd') {
-			delete_heap(p, &cnt);
-		}
-		if (ch == 'p') {
-			print_heap(p, cnt);
-		}
-		getchar();
+	srand(time(NULL));
+	int n, *p = NULL;
+	scanf("%d", &n);
+	p = (int *)malloc(sizeof(int)*(n + 1));
+	for (int i = 1; i <= n; i++) {
+		p[i] = rand() % 200 + 1;
 	}
+	print_arr(p, n);
+	buildHeap(p, n);
+	print_arr(p, n);
+	deleteHeap(p, n);
+	print_arr(p, n);
 }
