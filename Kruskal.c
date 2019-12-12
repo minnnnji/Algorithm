@@ -1,93 +1,84 @@
 #define _CRT_SECURE_NO_WARNINGS
-#define INF 1000
 #include<stdio.h>
 #include<stdlib.h>
-typedef struct vertic {
-	int elem;
-	int set_num;
-}vertic;
 typedef struct node {
 	struct node *next;
-	vertic *from, *to;
+	int u, v;
 	int weight;
 }node;
 node *getnode() {
 	node *p = NULL;
 	p = (node *)malloc(sizeof(node));
-	p->from = NULL;
-	p->to = NULL;
-	p->next = NULL;
+	p->next = 0;
 	return p;
 }
-void change_setnum(vertic **v, int k, int ori,int n) {
-	for (int i = 0; i < n; i++) {
-		if (v[i]->set_num == ori) {
-			v[i]->set_num = k;
+void make_graph(node *p,int u,int v,int w) {
+	node *tmp = p->next, *tmp_prev = p;
+	node *q = getnode();
+	q->u = u;
+	q->v = v;
+	q->weight = w;
+	while (tmp!= NULL&&tmp->weight<w) {
+		tmp = tmp->next;
+		tmp_prev = tmp_prev->next;
+	}
+	tmp_prev->next = q;
+	q->next = tmp;
+}
+void print_list(node *p) {
+	node *tmp = p->next;
+	while (tmp != NULL) {
+		printf("%d %d %d\n", tmp->u, tmp->v, tmp->weight);
+		tmp = tmp->next;
+	}
+	printf("\n");
+}
+void change_setnum(int *p, int n,int ori,int x) {
+	for (int i = 1; i <= n; i++) {
+		if (p[i] == ori) {
+			p[i] = x;
 		}
 	}
 }
-void Kruckal(node *p,int n,vertic **v) {
-	node *tmp = p->next;
+void kruskal(node *p, int n,int m) {
+	node *tmp;
 	node **rmp = NULL;
-	int i = 0;
-	rmp = (node **)malloc(sizeof(node)*n);
+	rmp = (node **)malloc(sizeof(node*)*n);
+	int *q = NULL;
+	q = (int *)malloc(sizeof(int)*(n + 1));
+	for (int i = 0; i <= n; i++) {
+		q[i] = i;
+	}
+	int a = 0;
+	tmp = p->next;
 	while (tmp != NULL) {
-		if (tmp->from->set_num != tmp->to->set_num) {
-			if (tmp->from->set_num < tmp->to->set_num) {
-				change_setnum(v, tmp->from->set_num, tmp->to->set_num, n + 1);
-				rmp[i] = tmp;
-				i++;
+		if (q[tmp->u] != q[tmp->v]) {
+			if (q[tmp->u] < q[tmp->v]) {
+				change_setnum(q, n, q[tmp->v], q[tmp->u]);
+				rmp[a++] = tmp;
 			}
 			else {
-				change_setnum(v, tmp->to->set_num, tmp->from->set_num, n + 1);
-				rmp[i] = tmp;
-				i++;
+				change_setnum(q, n, q[tmp->v],q[tmp->u]);
+				rmp[a++] = tmp;
 			}
 		}
 		tmp = tmp->next;
 	}
 	int sum = 0;
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < a; i++) {
 		printf(" %d", rmp[i]->weight);
 		sum += rmp[i]->weight;
 	}
 	printf("\n%d", sum);
 }
-void make_graph(node *p, vertic *from, vertic *to, int w, int *cnt) {
-	node *new_E = getnode();
-	new_E->from = from;
-	new_E->to = to;
-	new_E->weight = w;
-	node *tmp = p->next, *tmp_prev = p;
-	while (tmp != NULL&&tmp->weight < w) {
-		tmp_prev = tmp_prev->next;
-		tmp = tmp->next;
-	}
-	tmp_prev->next = new_E;
-	new_E->next = tmp;
-}
-void print_node(node *p) {
-	node *tmp = p->next;
-	while (tmp != NULL) {
-		printf("from %d to %d w %d \nset_n_f %d set_n_t %d \n\n", tmp->from->elem, tmp->to->elem, tmp->weight,tmp->from->set_num,tmp->to->set_num);
-		tmp = tmp->next;
-	}
-}
 int main() {
-	int n, m, from, to, weight, cnt = 1;
-	vertic **num = NULL;
-	node *Tree = getnode();//tree header
-	scanf("%d %d", &n, &m);//n - vertics m - edges
-	num = (vertic **)malloc(sizeof(vertic *)*n);
-	for (int i = 0; i < n; i++) {
-		num[i] = (vertic *)malloc(sizeof(vertic));
-		num[i]->set_num = 0;
-		num[i]->elem = i + 1;//vertic 함수
-		num[i]->set_num = i + 1;
-	}
+	int n, m, w, u, v;
+	scanf("%d %d", &n, &m);
+	node *list = getnode();
+
 	for (int i = 0; i < m; i++) {
-		scanf("%d %d %d", &from, &to, &weight);
-		make_graph(Tree, num[from-1], num[to-1], weight, &cnt);
+		scanf("%d %d %d", &u, &v, &w);
+		make_graph(list, u, v, w);
 	}
-	Kruckal(Tree, n - 1, num);
+	kruskal(list, n, m);
 }
